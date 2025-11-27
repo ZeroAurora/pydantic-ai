@@ -3118,7 +3118,7 @@ async def test_cache_point_filtering_responses_model():
     assert msg['content'][1]['text'] == 'text after'  # type: ignore[reportUnknownArgumentType]
 
 
-async def test_openai_custom_reasoning_field_sending_back_combined(allow_model_requests: None):
+async def test_openai_custom_reasoning_field_sending_back_in_thinking_tags(allow_model_requests: None):
     c = completion_message(
         ChatCompletionMessage.model_construct(content='response', reasoning_content='reasoning', role='assistant')
     )
@@ -3127,7 +3127,7 @@ async def test_openai_custom_reasoning_field_sending_back_combined(allow_model_r
         provider=OpenAIProvider(openai_client=MockOpenAI.create_mock(c)),
         profile=OpenAIModelProfile(
             openai_chat_custom_reasoning_field='reasoning_content',
-            openai_chat_include_reasoning_in_request='combined',
+            openai_chat_send_back_thinking_parts='thinking_tags',
         ),
     )
     settings = ModelSettings()
@@ -3147,7 +3147,7 @@ response\
     )
 
 
-async def test_openai_custom_reasoning_field_sending_back_separated(allow_model_requests: None):
+async def test_openai_custom_reasoning_field_sending_back_in_custom_field(allow_model_requests: None):
     c = completion_message(
         ChatCompletionMessage.model_construct(content='response', reasoning_content='reasoning', role='assistant')
     )
@@ -3156,7 +3156,7 @@ async def test_openai_custom_reasoning_field_sending_back_separated(allow_model_
         provider=OpenAIProvider(openai_client=MockOpenAI.create_mock(c)),
         profile=OpenAIModelProfile(
             openai_chat_custom_reasoning_field='reasoning_content',
-            openai_chat_include_reasoning_in_request='separated',
+            openai_chat_send_back_thinking_parts='custom_field',
         ),
     )
     settings = ModelSettings()
@@ -3176,7 +3176,7 @@ async def test_openai_custom_reasoning_field_not_sending(allow_model_requests: N
         provider=OpenAIProvider(openai_client=MockOpenAI.create_mock(c)),
         profile=OpenAIModelProfile(
             openai_chat_custom_reasoning_field='reasoning_content',
-            openai_chat_include_reasoning_in_request='none',
+            openai_chat_send_back_thinking_parts=False,
         ),
     )
     settings = ModelSettings()
@@ -3187,14 +3187,14 @@ async def test_openai_custom_reasoning_field_not_sending(allow_model_requests: N
     )
 
 
-async def test_openai_embedded_reasoning(allow_model_requests: None):
+async def test_openai_reasoning_in_thinking_tags(allow_model_requests: None):
     c = completion_message(
         ChatCompletionMessage.model_construct(content='<think>reasoning</think>response', role='assistant')
     )
     m = OpenAIChatModel(
         'foobar',
         provider=OpenAIProvider(openai_client=MockOpenAI.create_mock(c)),
-        profile=OpenAIModelProfile(),
+        profile=OpenAIModelProfile(openai_chat_send_back_thinking_parts='thinking_tags'),
     )
     settings = ModelSettings()
     params = ModelRequestParameters()
